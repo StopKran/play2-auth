@@ -1,4 +1,4 @@
-package jp.t2v.lab.play2
+package com.zeptolab.play2
 
 import play.api.mvc.Result
 

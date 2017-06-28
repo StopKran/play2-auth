@@ -1,4 +1,4 @@
-package jp.t2v.lab.play2.auth
+package com.zeptolab.play2.auth
 
 trait IdContainer[Id] {
 

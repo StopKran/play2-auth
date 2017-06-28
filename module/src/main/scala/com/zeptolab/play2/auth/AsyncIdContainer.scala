@@ -1,4 +1,4 @@
-package jp.t2v.lab.play2.auth
+package com.zeptolab.play2.auth
 
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.mvc.RequestHeader

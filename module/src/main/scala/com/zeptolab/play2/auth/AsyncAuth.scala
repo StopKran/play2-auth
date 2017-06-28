@@ -1,10 +1,12 @@
-package jp.t2v.lab.play2.auth
+package com.zeptolab.play2.auth
 
 import play.api.mvc._
 import scala.concurrent.{ExecutionContext, Future}
 
 trait AsyncAuth {
-    self: AuthConfig with Controller =>
+  self: AuthConfig with BaseController =>
+
+  def application: play.api.Application
 
   def authorized(authority: Authority)(implicit request: RequestHeader, context: ExecutionContext): Future[Either[Result, (User, ResultUpdater)]] = {
     restoreUser collect {
@@ -23,11 +25,11 @@ trait AsyncAuth {
 
   private[auth] def restoreUser(implicit request: RequestHeader, context: ExecutionContext): Future[(Option[User], ResultUpdater)] = {
     (for {
-      token  <- extractToken(request)
+      token <- extractToken(request)
     } yield for {
       Some(userId) <- idContainer.get(token)
-      Some(user)   <- resolveUser(userId)
-      _            <- idContainer.prolongTimeout(token, sessionTimeoutInSeconds)
+      Some(user) <- resolveUser(userId)
+      _ <- idContainer.prolongTimeout(token, sessionTimeoutInSeconds)
     } yield {
       Option(user) -> tokenAccessor.put(token) _
     }) getOrElse {
@@ -36,7 +38,7 @@ trait AsyncAuth {
   }
 
   private[auth] def extractToken(request: RequestHeader): Option[AuthenticityToken] = {
-    if (play.api.Play.maybeApplication.forall(app => play.api.Play.isTest(app))) {
+    if (application.mode == play.api.Mode.Test) {
       request.headers.get("PLAY2_AUTH_TEST_TOKEN") orElse tokenAccessor.extract(request)
     } else {
       tokenAccessor.extract(request)
